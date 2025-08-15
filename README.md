@@ -5,6 +5,7 @@
 # 🖥️ The Ultimate Arch Linux Bash Configuration
 
 A professional Bash configuration file for Arch Linux and BlackArch, containing **the best settings, shortcuts, and helper functions** to boost productivity and speed up terminal workflow.
+![Uploading image.png…]()
 
 ---
 
