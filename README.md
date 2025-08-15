@@ -41,14 +41,12 @@ broot (optional — for file navigation)
 Install fastfetch:
 
 bash
-نسخ
-تحرير
+
 sudo pacman -S fastfetch
 Install yay:
 
 bash
-نسخ
-تحرير
+
 sudo pacman -S yay
 ⚙️ Installation
 Copy the file to your home directory:
@@ -115,5 +113,78 @@ active   on
 desactive off
 ===========================================================================
 run  help for more info 
+=================================
+## 🗂️ Aliases Reference
+
+Below is the full list of aliases included in this Bash configuration:
+
+| Alias            | Command                                                                                                                       | Description                                                                 |
+|------------------|-------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| **System / Packages (Pacman & Yay)** |
+| `update`         | `sudo pacman -Syu`                                                                                                             | Update system using Pacman                                                  |
+| `install`        | `sudo pacman -S`                                                                                                               | Install a package                                                           |
+| `remove`         | `sudo pacman -Rns`                                                                                                             | Remove a package with unused dependencies                                  |
+| `search`         | `pacman -Ss`                                                                                                                   | Search packages in repositories                                             |
+| `orphans`        | `pacman -Qdtq`                                                                                                                 | List orphaned packages                                                      |
+| `clean`          | `sudo pacman -Rns $(pacman -Qdtq)`                                                                                             | Remove all orphaned packages                                                |
+| `yupdate`        | `yay -Syu --devel`                                                                                                             | Update system + AUR (including development packages)                        |
+| `yinstall`       | `yay -S`                                                                                                                       | Install from AUR or official repos                                          |
+| `yclean`         | `yay -Yc`                                                                                                                      | Clean all unneeded dependencies from AUR                                   |
+| `upall`          | `sudo pacman -Syu && yay -Syu`                                                                                                 | Update system + AUR together                                                |
+| `pacsearch`      | `pacman -Ss`                                                                                                                   | Search for packages                                                         |
+| `pacinfo`        | `pacman -Si`                                                                                                                   | Show package information                                                    |
+| `psize`          | `pacman -Qi | grep Installed`                                                                                                  | Show installed package sizes                                                 |
+| **Navigation** |
+| `..`             | `cd ..`                                                                                                                        | Go up one directory                                                          |
+| `...`            | `cd ../..`                                                                                                                     | Go up two directories                                                        |
+| `....`           | `cd ../../..`                                                                                                                  | Go up three directories                                                      |
+| `cdp`            | `cd ~/Pictures`                                                                                                                | Go to Pictures folder                                                        |
+| `cdd`            | `cd ~/Downloads`                                                                                                               | Go to Downloads folder                                                       |
+| `cdt`            | `cd ~/tools`                                                                                                                   | Go to tools folder                                                           |
+| `cdo`            | `cd ~/Documents`                                                                                                               | Go to Documents folder                                                       |
+| `ll`             | `ls -lAh`                                                                                                                      | List files with details                                                      |
+| `la`             | `ls -A`                                                                                                                        | List hidden files without `.` and `..`                                      |
+| `l`              | `ls -CF`                                                                                                                       | Compact list view                                                            |
+| **System Management & Monitoring** |
+| `c`              | `clear`                                                                                                                        | Clear terminal screen                                                        |
+| `cls`            | `clear`                                                                                                                        | Clear terminal screen                                                        |
+| `h`              | `history`                                                                                                                      | Show command history                                                         |
+| `meminfo`        | `free -m -l -t`                                                                                                                 | Show memory usage                                                            |
+| `cpuinfo`        | `lscpu`                                                                                                                         | Show CPU information                                                         |
+| `psmem`          | `ps auxf | sort -nr -k 4 | head -10`                                                                                            | Show top 10 processes by memory usage                                        |
+| `pscpu`          | `ps auxf | sort -nr -k 3 | head -10`                                                                                            | Show top 10 processes by CPU usage                                           |
+| `se`             | `sudo systemctl`                                                                                                               | Manage system services                                                       |
+| `se-u`           | `systemctl --user`                                                                                                              | Manage user services                                                         |
+| `ip`             | `ip a`                                                                                                                          | Show network interfaces and IP addresses                                     |
+| `ports`          | `ss -tuln`                                                                                                                      | Show open ports                                                               |
+| `pingg`          | `ping google.com`                                                                                                               | Ping Google                                                                   |
+| `publicip`       | `curl ifconfig.me`                                                                                                              | Show public IP address                                                        |
+| `weather`        | `curl wttr.in`                                                                                                                  | Show weather forecast in terminal                                             |
+| **Quick Config File Editing** |
+| `dns`            | `sudo nano /etc/resolv.conf`                                                                                                    | Edit DNS configuration                                                       |
+| `mirrorlist`     | `sudo nano /etc/pacman.d/mirrorlist`                                                                                            | Edit Pacman mirror list                                                       |
+| `pacmanconf`     | `sudo nano /etc/pacman.conf`                                                                                                    | Edit Pacman configuration                                                    |
+| `hosts`          | `sudo nano /etc/hosts`                                                                                                          | Edit hosts file                                                               |
+| `hostnamefile`   | `sudo nano /etc/hostname`                                                                                                       | Edit system hostname                                                          |
+| `netconf`        | `sudo nano /etc/NetworkManager/NetworkManager.conf`                                                                             | Edit NetworkManager configuration                                            |
+| `fstab`          | `sudo nano /etc/fstab`                                                                                                          | Edit filesystem table                                                         |
+| `mkinit`         | `sudo nano /etc/mkinitcpio.conf`                                                                                                | Edit mkinitcpio configuration                                                |
+| `bootloader`     | `sudo nano /boot/loader/entries/arch.conf`                                                                                      | Edit bootloader entry                                                         |
+| `iptables`       | `sudo nano /etc/iptables/iptables.rules`                                                                                        | Edit iptables firewall rules                                                  |
+| `passwdfile`     | `sudo nano /etc/passwd`                                                                                                         | Edit passwd file                                                              |
+| `shadow`         | `sudo nano /etc/shadow`                                                                                                         | Edit shadow file                                                              |
+| `sudoers`        | `sudo EDITOR=nano visudo`                                                                                                       | Edit sudoers file                                                             |
+| `locale`         | `sudo nano /etc/locale.gen`                                                                                                     | Edit locale configuration                                                     |
+| `environment`    | `sudo nano /etc/environment`                                                                                                    | Edit environment variables                                                    |
+| `x11conf`        | `sudo nano /etc/X11/xorg.conf.d/00-keyboard.conf`                                                                               | Edit X11 keyboard configuration                                               |
+| `gpgconf`        | `sudo nano /etc/pacman.d/gnupg/gpg.conf`                                                                                        | Edit GPG configuration                                                        |
+| **Personal / Custom Shortcuts** |
+| `ouassim`        | `source ~/.bashrc`                                                                                                              | Reload Bash configuration                                                     |
+| `ouassim-edite`  | `sudo mousepad ~/.bashrc`                                                                                                       | Edit Bash configuration                                                       |
+| `music`          | `ncmpcpp`                                                                                                                       | Launch ncmpcpp music player                                                    |
+| `win`            | `mountpoint -q /mnt/windows || (sudo mkdir -p /mnt/windows && sudo mount -t ntfs-3g /dev/sda3 /mnt/windows); cd /mnt/windows`   | Mount and access Windows partition                                            |
+| `on`             | `source ~/.venvs/global/bin/activate`                                                                                          | Activate Python virtual environment                                           |
+| `off`            | `deactivate`                                                                                                                    | Deactivate Python virtual environment                                         |
+
 help
 
