@@ -54,27 +54,21 @@ sudo pacman -S yay
 Copy the file to your home directory:
 
 bash
-نسخ
-تحرير
+
 cp bashrc.txt ~/.bashrc
 Reload the configuration:
 
 bash
-نسخ
-تحرير
 source ~/.bashrc
 To ensure the config is applied, open a new terminal or run:
 
 bash
-نسخ
-تحرير
 ouassim
 ▶️ Python Environment On/Off
 To activate the default Python environment:
 
 bash
-نسخ
-تحرير
+
 on
 To deactivate the Python environment:
 
@@ -119,4 +113,7 @@ Python venv name is shown if active
 create venu enverment in /home/user/.venvs/global/
 active   on 
 desactive off
+===========================================================================
+run  help for more info 
+help
 
