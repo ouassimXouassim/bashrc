@@ -5,12 +5,12 @@
 # 🖥️ The Ultimate Arch Linux Bash Configuration
 
 A professional Bash configuration file for Arch Linux and BlackArch, containing **the best settings, shortcuts, and helper functions** to boost productivity and speed up terminal workflow.
-https://github.com/ouassimXouassim/bashrc/blob/main/Screenshot_20250815_154025.png
+
 
 ---
 
 ## 📌 Features
-- **Professional Kali-like Prompt** with:
+- **Professional Prompt** with:
   - Time & date display
   - Last command execution time
   - Git branch support
@@ -40,40 +40,22 @@ Before using this file, make sure you have:
 broot (optional — for file navigation)
 
 Install fastfetch:
-
-bash
-
 sudo pacman -S fastfetch
 Install yay:
-
-bash
-
 sudo pacman -S yay
 ⚙️ Installation
 Copy the file to your home directory:
-
-bash
-
-cp bashrc.txt ~/.bashrc
+rename file bashrc.txt to .bashrc 
+and copy to 
+cp .bashrc ~/.bashrc
 Reload the configuration:
-
-bash
 source ~/.bashrc
 To ensure the config is applied, open a new terminal or run:
-
-bash
 ouassim
 ▶️ Python Environment On/Off
 To activate the default Python environment:
-
-bash
-
 on
 To deactivate the Python environment:
-
-bash
-
-
 off
 📚 Custom Commands (Aliases)
 Command	Description
@@ -91,10 +73,6 @@ weather	Show weather in terminal
 ouassim	Reload .bashrc file
 
 For more commands, type:
-
-bash
-
-
 help
 📸 Prompt Preview
 text
