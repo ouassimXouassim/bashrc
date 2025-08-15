@@ -85,12 +85,10 @@ text
 
 ✘ means last command failed
 
-Python venv name is shown if active
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 create venu enverment in /home/user/.venvs/global/
 active   on 
 desactive off
-===========================================================================
+=================================
 run  help for more info 
 =================================
 ## 🗂️ Aliases Reference
