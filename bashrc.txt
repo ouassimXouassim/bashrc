@@ -1,0 +1,474 @@
+# ~/.bashrc - The Ultimate Arch Linux Edition (Customized)
+# A single, powerful, and easy-to-manage configuration file.
+
+# ---------------------------------------------------------------------------
+#  1. INTERACTIVE SHELL CHECK
+# ---------------------------------------------------------------------------
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# ---------------------------------------------------------------------------
+#  2. HISTORY CONTROL
+# ---------------------------------------------------------------------------
+export HISTCONTROL=ignoreboth:erasedups
+shopt -s histappend
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTIGNORE='ls:ll:la:l:bg:fg:history:clear:c:help'
+# Sync history across all open terminals immediately
+PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+# ---------------------------------------------------------------------------
+#  3. ADVANCED SHELL OPTIONS
+# ---------------------------------------------------------------------------
+shopt -s cdspell
+shopt -s globstar
+shopt -s checkwinsize
+
+# ---------------------------------------------------------------------------
+#  4. COLORS AND APPEARANCE
+# ---------------------------------------------------------------------------
+export LS_OPTIONS='--color=auto'
+alias ls='ls $LS_OPTIONS -F'
+export GREP_OPTIONS='--color=auto'
+
+# ---------------------------------------------------------------------------
+#  5. THE ULTIMATE KALI-LIKE PROMPT
+# ---------------------------------------------------------------------------
+
+# This function calculates the execution time of the last command.
+# It's a bit complex but allows the [ took Xs ] feature.
+__prompt_timer() {
+    if [[ -n "$__prompt_start_time" ]]; then
+        local end_time=$SECONDS
+        local duration=$((end_time - __prompt_start_time))
+        if [ $duration -ge 2 ]; then
+            echo -e " [ took ${duration}s ]"
+        fi
+    fi
+}
+
+# This function will be executed before displaying the prompt.
+__prompt_command() {
+    local exit_code=$?
+    # Reset the timer for the next command.
+    __prompt_start_time=$SECONDS
+
+    # --- Define Colors ---
+    local c_red="\[\033[0;31m\]"
+    local c_green="\[\033[0;32m\]"
+    local c_yellow="\[\033[0;33m\]"
+    local c_blue="\[\033[0;34m\]"
+    local c_light_cyan="\[\033[1;36m\]"
+    local c_light_grey="\[\033[0;37m\]"
+    local c_bold_white="\[\033[1;37m\]"
+    local c_reset="\[\033[0m\]"
+
+    # --- Define Symbols ---
+    # Make sure you have a Nerd Font installed for these characters.
+    local s_user_host_sep="㉿"
+    local s_prompt_start="┌"
+    local s_branch_sep="├"
+    local s_prompt_end="└"
+    local s_line="─"
+    local s_success="✔"
+    local s_fail="✘"
+
+    # --- Git Information ---
+    local git_info=""
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        local git_branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+        local dirty=""
+        if ! git diff --quiet --ignore-submodules; then
+            dirty="*"
+        fi
+        git_info="${c_yellow} (${git_branch}${dirty})${c_reset}"
+    fi
+
+    # --- Prompt Structure ---
+# إذا كانت البيئة مفعّلة، أضف اسمها داخل prompt
+    local venv=""
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        venv=" ${c_green}($(basename $VIRTUAL_ENV))${c_blue}"
+    fi
+
+    local line1="${c_blue}${s_prompt_start}${s_line}${s_line}(${c_bold_white}\u${c_light_cyan}${s_user_host_sep}${c_bold_white}\h${c_blue})${venv}-[${c_light_grey}\w${c_blue}]${git_info}"
+
+
+    # Line 2: ├─[time date] [ took Xs ]
+    local line2="${c_blue}${s_branch_sep}${s_line}${c_reset}[$(date +'%H:%M %Y-%m-%d')]$(__prompt_timer)"
+
+    # Line 3: └─✔ $
+    local prompt_symbol="$"
+    if [[ $EUID -eq 0 ]]; then
+        prompt_symbol="#" # Use # for root user
+    fi
+
+    local exit_symbol
+    if [[ $exit_code -eq 0 ]]; then
+        exit_symbol="${c_green}${s_success}"
+    else
+        exit_symbol="${c_red}${s_fail}"
+    fi
+
+    local line3="${c_blue}${s_prompt_end}${s_line}${exit_symbol}${c_reset} ${prompt_symbol} "
+
+    # --- Set PS1 ---
+    PS1="\n${line1}\n${line2}\n${line3}"
+}
+
+# Set PROMPT_COMMAND to our custom function
+PROMPT_COMMAND="__prompt_command; $PROMPT_COMMAND"
+
+
+# ---------------------------------------------------------------------------
+#  6. ALIASES (COMMAND SHORTCUTS)
+# ---------------------------------------------------------------------------
+# -- Pacman & AUR Helper (yay example) --
+alias update='sudo pacman -Syu'
+alias install='sudo pacman -S'
+alias remove='sudo pacman -Rns'
+alias search='pacman -Ss'
+alias orphans='pacman -Qdtq'
+alias clean='sudo pacman -Rns $(pacman -Qdtq)'
+alias yupdate='yay -Syu --devel'
+alias yinstall='yay -S'
+alias yclean='yay -Yc'
+
+# -- Navigation & ls --
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ll='ls -lAh'
+alias la='ls -A'
+alias l='ls -CF'
+
+# -- System & Resource Management --
+alias c='clear'
+alias h='history'
+alias meminfo='free -m -l -t'
+alias cpuinfo='lscpu'
+alias psmem='ps auxf | sort -nr -k 4 | head -10'
+alias pscpu='ps auxf | sort -nr -k 3 | head -10'
+
+# -- Safe Commands --
+alias mv='mv -i'
+alias cp='cp -i'
+alias rm='rm -I'
+
+# ---------------------------------------------------------------------------
+#  7. HELPER FUNCTIONS
+# ---------------------------------------------------------------------------
+
+# The new 'help' command for Arch Linux
+help() {
+cat << EOF
+╔════════════════════════════════════════════════════════════════════════════╗
+║ Command                             │ Description                          ║
+╠═════════════════════════════════════╪══════════════════════════════════════╣
+║ sudo pacman -Syu                    │ Sync repos & update all packages     ║
+║ sudo pacman -Syyu                   │ Force refresh + update               ║
+║ sudo pacman -S [package]            │ Install package                      ║
+║ sudo pacman -Sg [group]             │ Install package group (e.g. gnome)   ║
+║ sudo pacman -R [package]            │ Remove package (keep deps)           ║
+║ sudo pacman -Rns [package]          │ Remove + unneeded deps + config      ║
+║ sudo pacman -Ss [query]             │ Search repos                         ║
+║ sudo pacman -Qs [query]             │ Search installed packages            ║
+║ sudo pacman -Q                      │ List installed packages              ║
+║ sudo pacman -Qe                     │ List explicitly installed            ║
+║ sudo pacman -Qd                     │ List dependencies only               ║
+║ sudo pacman -Qdtq                   │ List orphan packages                 ║
+║ sudo pacman -Rns                    │ Remove all orphan packages           ║
+║ sudo pacman -Qi [package]           │ Info about installed package         ║
+║ sudo pacman -Si [package]           │ Info about repo package              ║
+║ sudo pacman -Ql [package]           │ List files in package                ║
+║ sudo pacman -Qo [file]              │ Find which pkg owns file             ║
+║ sudo pacman -Sc                     │ Clean unused cached packages         ║
+║ sudo pacman -Scc                    │ Clean all cache                      ║
+║ sudo pacman -U [file.pkg.tar.zst]   │ Install local package                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════╗
+║ Command                             │ Description                          ║
+╠═════════════════════════════════════╪══════════════════════════════════════╣
+║ yay -S [package]                    │ Install from AUR or repos            ║
+║ yay -Syu                            │ Full system update (incl. AUR)       ║
+║ yay -Rns [package]                  │ Remove AUR pkg + unused deps         ║
+║ yay -Ss [query]                     │ Search AUR & repos                   ║
+║ yay -Yc                             │ Clean all unneeded dependencies      ║
+║ yay -G [package]                    │ Get PKGBUILD from AUR                ║
+║ yay -Ps                             │ Print system stats                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════╗
+║ Command                             │ Description                          ║
+╠═════════════════════════════════════╪══════════════════════════════════════╣
+║ sudo useradd -m [username]          │ Add user with home                   ║
+║ sudo passwd [username]              │ Set/change password                  ║
+║ sudo usermod -aG [group] [user]     │ Add user to group                    ║
+║ sudo userdel -r [username]          │ Delete user and home                 ║
+║ groups [username]                   │ Show user groups                     ║
+║ id [username]                       │ UID/GID info                         ║
+╚════════════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════╗
+║ Command                             │ Description                          ║
+╠═════════════════════════════════════╪══════════════════════════════════════╣
+║ ip a                                │ Show IPs & interfaces                ║
+║ ip route                            │ Show routing table                   ║
+║ ping [host]                         │ Ping host                            ║
+║ nmcli dev status                    │ Network status (via NetworkManager)  ║
+║ iwctl                               │ Wireless management (iwd)            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════╗
+║ Command                             │ Description                          ║
+╠═════════════════════════════════════╪══════════════════════════════════════╣
+║ lsblk                               │ List disks & partitions              ║
+║ df -h                               │ Disk usage (human readable)          ║
+║ free -h                             │ RAM usage (human readable)           ║
+║ lscpu                               │ CPU info                             ║
+║ lspci                               │ PCI devices                          ║
+║ lsusb                               │ USB devices                          ║
+║ uname -a                            │ Kernel/system info                   ║
+║ hostnamectl                         │ View/set hostname                    ║
+║ dmesg                               │ Kernel logs                          ║
+╚════════════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════╦═══════════════════════════════════════════════╗
+║ Alias                      ║ Original Command                              ║
+╠════════════════════════════╬═══════════════════════════════════════════════╣
+║ cls                        ║ clear                                         ║
+║ h                          ║ history                                       ║
+║ update                     ║ sudo pacman -Syu                              ║
+║ upall                      ║ sudo pacman -Syu && yay -Syu                  ║
+║ se                         ║ sudo systemctl                                ║
+║ se-u                       ║ systemctl --user                              ║
+║ ip                         ║ ip a                                          ║
+║ ports                      ║ ss -tuln                                      ║
+║ pingg                      ║ ping google.com                               ║
+║ publicip                   ║ curl ifconfig.me                              ║
+║ pacsearch                  ║ pacman -Ss                                    ║
+║ pacinfo                    ║ pacman -Si                                    ║
+║ psize                      ║ pacman -Qi | grep Installed                   ║
+║ weather                    ║ curl wttr.in                                  ║
+║ dns                        ║ /etc/resolv.conf                              ║
+║ mirrorlist                 ║ /etc/pacman.d/mirrorlist                      ║
+║ pacmanconf                 ║ /etc/pacman.conf                              ║
+║ hosts                      ║ /etc/hosts                                    ║
+║ hostnamefile               ║ /etc/hostname                                 ║
+║ netconf                    ║ /etc/NetworkManager/NetworkManager.conf       ║
+║ fstab                      ║ /etc/fstab                                    ║
+║ mkinit                     ║ /etc/mkinitcpio.conf                          ║
+║ bootloader                 ║ /boot/loader/entries/arch.conf                ║
+║ iptables                   ║ /etc/iptables/iptables.rules                  ║
+║ passwdfile                 ║ /etc/passwd                                   ║
+║ shadow                     ║ /etc/shadow                                   ║
+║ sudoers                    ║ sudo EDITOR=nano visudo                       ║
+║ locale                     ║ /etc/locale.gen                               ║
+║ environment                ║ /etc/environment                              ║
+║ x11conf                    ║ /etc/X11/xorg.conf.d/00-keyboard.conf         ║
+║ gpgconf                    ║ /etc/pacman.d/gnupg/gpg.conf                  ║
+║ ouassim                    ║ source ~/.bashrc                              ║
+║ ouassim-edite              ║ sudo mousepad ~/.bashrc                       ║
+╚════════════════════════════╩═══════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+  🧾 Bash Built-in Commands                                        Description                            Usage / Syntax
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ alias                                                │ Create/display aliases              │ alias [-p] [name[=value] ...]         ║
+║ bg                                                   │ Resume job in background            │ bg [job_spec ...]                     ║
+║ bind                                                 │ Key bindings                        │ bind [options]                        ║
+║ break                                                │ Exit loop                           │ break [n]                             ║
+║ builtin                                              │ Run builtin command                 │ builtin [shell-builtin [arg ...]]     ║
+║ caller                                               │ Show call context                   │ caller [expr]                         ║
+║ case ... esac                                        │ Pattern conditional                 │ case WORD in PATTERN) ... esac        ║
+║ cd                                                   │ Change directory                    │ cd [-L|-P] [dir]                      ║
+║ command                                              │ Ignore functions/aliases            │ command [-pVv] command [args...]      ║
+║ compgen                                              │ Auto-complete generation            │ compgen [options]                     ║
+║ complete                                             │ Setup completion                    │ complete [options]                    ║
+║ compopt                                              │ Completion options                  │ compopt [options] [name ...]          ║
+║ continue                                             │ Next loop iteration                 │ continue [n]                          ║
+║ coproc                                               │ Asynchronous coprocess              │ coproc [NAME] command [redirects]     ║
+║ declare / typeset                                    │ Declare variables                   │ declare [options] [name[=value] ...]  ║
+║ dirs                                                 │ Show dir stack                      │ dirs [-clpv] [+N] [-N]                ║
+║ disown                                               │ Remove from job table               │ disown [-h] [-ar] [jobspec | pid]     ║
+║ echo                                                 │ Print to stdout                     │ echo [-neE] [arg ...]                 ║
+║ enable                                               │ Enable builtins                     │ enable [-a] [-dnps] [-f file] [name]  ║
+║ eval                                                 │ Evaluate code                       │ eval [arg ...]                        ║
+║ exec                                                 │ Replace shell                       │ exec [options] command [args ...]     ║
+║ exit                                                 │ Exit shell                          │ exit [n]                              ║
+║ export                                               │ Export env variable                 │ export [options] name[=value]         ║
+║ false                                                │ Always fails                        │ false                                 ║
+║ fc                                                   │ Fix/edit command                    │ fc [options] or fc -s [old=new] cmd   ║
+║ fg                                                   │ Foreground job                      │ fg [job_spec]                         ║
+║ for ... do ... done                                  │ Loop values                         │ for VAR in LIST; do ...; done         ║
+║ for ((...)) do ... done                              │ C-style loop                        │ for (( expr1; expr2; expr3 )); do...  ║
+║ function name { ... }                                │ Define function                     │ function name { commands; }           ║
+║ getopts                                              │ Parse options                       │ getopts optstring name [arg ...]      ║
+║ hash                                                 │ Hash table                          │ hash [options] [name ...]             ║
+║ help                                                 │ Help on builtins                    │ help [pattern]                        ║
+║ history                                              │ Command history                     │ history [options]                     ║
+║ if ... then ... fi                                   │ Conditional                         │ if cond; then ...; [else ...]; fi     ║
+║ jobs                                                 │ List jobs                           │ jobs [-lnprs] [jobspec ...]           ║
+║ kill                                                 │ Signal process                      │ kill [-s sig] pid | jobspec           ║
+║ let                                                  │ Arithmetic eval                     │ let arg [arg ...]                     ║
+║ local                                                │ Local variables                     │ local [option] name[=value] ...       ║
+║ logout                                               │ Logout login shell                  │ logout [n]                            ║
+║ mapfile / readarray                                  │ Read lines to array                 │ mapfile [options] [array]             ║
+║ popd                                                 │ Pop dir stack                       │ popd [-n] [+N | -N]                   ║
+║ printf                                               │ Formatted output                    │ printf [-v var] format [args]         ║
+║ pushd                                                │ Push dir to stack                   │ pushd [-n] [+N | -N | dir]            ║
+║ pwd                                                  │ Print directory                     │ pwd [-LP]                             ║
+║ read                                                 │ Read from input                     │ read [options] [name ...]             ║
+║ readonly                                             │ Read-only vars                      │ readonly [options] [name[=value] ...] ║
+║ return                                               │ Return from function                │ return [n]                            ║
+║ select ... in ... do ...                             │ Menu selection                      │ select NAME in WORDS; do ...; done    ║
+║ set                                                  │ Shell options/params                │ set [options] [--] [args ...]         ║
+║ shift                                                │ Shift parameters                    │ shift [n]                             ║
+║ shopt                                                │ Shell options                       │ shopt [options] [optname ...]         ║
+║ source / .                                           │ Source file                         │ source FILE [args] / . FILE [args]    ║
+║ suspend                                              │ Pause shell                         │ suspend [-f]                          ║
+║ test / [ ... ]                                       │ Test expression                     │ test EXP / [ EXP ]                    ║
+║ [[ ... ]]                                            │ Advanced test                       │ [[ EXP ]]                             ║
+║ time                                                 │ Time command                        │ time [-p] command                     ║
+║ times                                                │ CPU usage                           │ times                                 ║
+║ trap                                                 │ Handle signals                      │ trap [action] signal_spec ...         ║
+║ true                                                 │ Always true                         │ true                                  ║
+║ type                                                 │ Show command type                   │ type [-afptP] name                    ║
+║ ulimit                                               │ Resource limits                     │ ulimit [options] [limit]              ║
+║ umask                                                │ Default permissions                 │ umask [-p] [-S] [mode]                ║
+║ unalias                                              │ Remove aliases                      │ unalias [-a] name                     ║
+║ unset                                                │ Unset variable/function             │ unset [-f] [-v] [-n] name             ║
+║ until ... do ... done                                │ Loop until true                     │ until cond; do ...; done              ║
+║ variables                                            │ List shell variables                │ variables                             ║
+║ wait                                                 │ Wait for job                        │ wait [-fn] [-p var] [id ...]          ║
+║ while ... do ... done                                │ Loop while true                     │ while cond; do ...; done              ║
+║ { ... }                                              │ Command group                       │ { commands; }                         ║
+║ !                                                    │ Run from history                    │ !n, !-1, !cmd, etc.                   ║
+║ (( expression ))                                     │ Arithmetic eval                     │ (( a > b ))                           ║
+║ :                                                    │ Null command                        │ :                                     ║
+╚══════════════════════════════════════════════════════╧═════════════════════════════════════╧═══════════════════════════════════════╝
+EOF
+}
+
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Universal extraction function
+extract() {
+    if [ -f "$1" ] ; then
+        case "$1" in
+            *.tar.bz2)   tar xvjf "$1"    ;;
+            *.tar.gz)    tar xvzf "$1"    ;;
+            # ... (the rest of the extract function remains the same)
+            *.zip)       unzip "$1"       ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+#  8. BASH COMPLETION
+# ---------------------------------------------------------------------------
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+#  9. WELCOME MESSAGE (in English)
+# ---------------------------------------------------------------------------
+# Using fastfetch or neofetch for a cool, informative greeting.
+if command -v fastfetch &> /dev/null; then
+    fastfetch
+elif command -v neofetch &> /dev/null; then
+    neofetch
+fi
+
+printf "Welcome to Arch Linux, %s! Session started: $(date)\\n" "$USER
+"
+# ---------------------------------------------------------------------------
+#### ✅ BlackArch: أمر لعرض التصنيفات + الأدوات
+# ---------------------------------------------------------------------------
+blackarch() {
+    echo -e "\e[1;35m📂 تصنيفات BlackArch:\e[0m"
+    for g in $(pacman -Sg | grep ^blackarch- | cut -d' ' -f1 | sort -u); do
+  echo -e "\n📂 $g:"
+  pacman -Sg "$g" | awk '{print $2}' | while read tool; do
+    pacman -Qq "$tool" &>/dev/null && echo "  ✅ $tool"
+  done
+done
+}
+# ---------------------------------------------------------------------------
+#  shurcate
+# ---------------------------------------------------------------------------
+
+alias cls='clear'
+alias h='history'
+alias update='sudo pacman -Syu'
+alias upall='sudo pacman -Syu && yay -Syu'
+alias se='sudo systemctl'
+alias se-u='systemctl --user'
+alias ip='ip a'
+alias ports='ss -tuln'
+alias pingg='ping google.com'
+alias publicip='curl ifconfig.me'
+alias pacsearch='pacman -Ss'
+alias pacinfo='pacman -Si'
+alias psize='pacman -Qi | grep Installed'
+alias weather='curl wttr.in'
+alias dns='sudo nano /etc/resolv.conf'
+alias mirrorlist='sudo nano /etc/pacman.d/mirrorlist'
+alias pacmanconf='sudo nano /etc/pacman.conf'
+alias hosts='sudo nano /etc/hosts'
+alias hostnamefile='sudo nano /etc/hostname'
+alias netconf='sudo nano /etc/NetworkManager/NetworkManager.conf'
+alias fstab='sudo nano /etc/fstab'
+alias mkinit='sudo nano /etc/mkinitcpio.conf'
+alias bootloader='sudo nano /boot/loader/entries/arch.conf'
+alias iptables='sudo nano /etc/iptables/iptables.rules'
+alias passwdfile='sudo nano /etc/passwd'
+alias shadow='sudo nano /etc/shadow'
+alias sudoers='sudo EDITOR=nano visudo'
+alias locale='sudo nano /etc/locale.gen'
+alias environment='sudo nano /etc/environment'
+alias x11conf='sudo nano /etc/X11/xorg.conf.d/00-keyboard.conf'
+alias gpgconf='sudo nano /etc/pacman.d/gnupg/gpg.conf'
+alias ouassim='source ~/.bashrc'
+alias ouassim-edite='sudo mousepad ~/.bashrc'
+alias music='ncmpcpp'
+alias win='mountpoint -q /mnt/windows || (sudo mkdir -p /mnt/windows && sudo mount -t ntfs-3g /dev/sda3 /mnt/windows); cd /mnt/windows'
+# ---------------------------------------------------------------------------
+#  esy move
+# ---------------------------------------------------------------------------
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias cdp='cd ~/Pictures'
+alias cdd='cd ~/Downloads'
+alias cdt='cd ~/tools'
+alias cdo='cd ~/Documents'
+
+
+# Created by `pipx` on 2025-07-24 03:53:33
+export PATH="$PATH:/home/ouassim/.local/bin"
+
+
+# ---------------------------------------------------------------------------
+#  auto save
+# ---------------------------------------------------------------------------
+#
+# ───────────────────────────────────────────────────────────────
+
+
+
+
+alias on='source ~/.venvs/global/bin/activate'
+alias off='deactivate'
+
+source /home/ouassim/.config/broot/launcher/bash/br
